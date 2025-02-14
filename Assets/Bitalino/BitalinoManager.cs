@@ -31,7 +31,9 @@ public class BitalinoManager : MonoBehaviour
         pluxDevManager = new PluxDeviceManager(ScanResults, ConnectionDone, AcquisitionStarted, OnDataReceived, OnEventDetected, OnExceptionRaised);
         pluxDevManager.WelcomeFunctionUnity();
 
-        pluxDevManager.GetDetectableDevicesUnity(new List<string>() { "BTH", "BLE" });
+        var lis = new List<string>() { "BTH"};
+
+        pluxDevManager.GetDetectableDevicesUnity(lis);
 
     }
     void Start()
@@ -42,12 +44,19 @@ public class BitalinoManager : MonoBehaviour
     void OnApplicationQuit()
     {
         pluxDevManager.DisconnectPluxDev();
+        Debug.Log("Bitalino disconnected");
     }
     public void ScanResults(List<string> listDevices)
     {
+       
         Debug.Log("Results : " + listDevices.Count);
         if (listDevices.Count > 0)
         {
+            foreach (var device in listDevices)
+            {
+                Debug.Log("dev : " + device);
+            }
+
             devAdress = listDevices[0];
             pluxDevManager.PluxDev(devAdress);
         }
@@ -56,7 +65,7 @@ public class BitalinoManager : MonoBehaviour
         {
             if(!connected)
             {
-                //      OnStart();
+                OnStart();
             }
         }
 
@@ -77,7 +86,7 @@ public class BitalinoManager : MonoBehaviour
         {
             if (!connected)
             {
-                //    OnStart();
+                OnStart();
             }
             else
             {
@@ -99,7 +108,7 @@ public class BitalinoManager : MonoBehaviour
         {
             if (!connected)
             {
-              //  OnStart();
+                OnStart();
             }
         }
         

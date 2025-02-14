@@ -22,33 +22,47 @@ public class PageScript : MonoBehaviour
     public Button ParanFantomeButton;
     public Button ParaMaisonButton;
 
+
+    public Button AnthroTributs;
+    public Button AnthroMalediction;
+    public Button AnthroOs;
+
+
     public static MainManager instance;
 
     public GameObject pageButtons;
 
-    private int changeButtonsDelay = 2;
-
-    public int nb_buttons_displayed = 3;
+    public int nb_buttons_displayed = 4;
     public GameObject passwordManager;
+
+    private List<GameObject> alreadyUsed;
 
 
     public void Start()
     {
-        AlienBasesButton.onClick.AddListener(() => { OnPageOpen("Alien", "Bases"); });
-        AlienGuerreButton.onClick.AddListener(() => { OnPageOpen("Alien", "Guerre");  });
-        AlienAbductionsButton.onClick.AddListener(() => { OnPageOpen("Alien", "Abductions"); });
+        AlienBasesButton.onClick.AddListener(() => { OnPageOpen("Alien", "Bases"); alreadyUsed.Add(AlienBasesButton.gameObject); });
+        AlienGuerreButton.onClick.AddListener(() => { OnPageOpen("Alien", "Guerre"); alreadyUsed.Add(AlienGuerreButton.gameObject); });
+        AlienAbductionsButton.onClick.AddListener(() => { OnPageOpen("Alien", "Abductions"); alreadyUsed.Add(AlienAbductionsButton.gameObject); });
 
-        PyramideGizehButton.onClick.AddListener(() => { OnPageOpen("Pyramide", "Gizeh"); });
-        PyramideToutButton.onClick.AddListener(() => { OnPageOpen("Pyramide", "Toutânkhamon"); });
-        PyramideBosnieButton.onClick.AddListener(() => { OnPageOpen("Pyramide", "Bosnie"); });
+        PyramideGizehButton.onClick.AddListener(() => { OnPageOpen("Pyramide", "Gizeh"); alreadyUsed.Add(PyramideGizehButton.gameObject); });
+        PyramideToutButton.onClick.AddListener(() => { OnPageOpen("Pyramide", "Toutânkhamon"); alreadyUsed.Add(PyramideToutButton.gameObject); });
+        PyramideBosnieButton.onClick.AddListener(() => { OnPageOpen("Pyramide", "Bosnie"); alreadyUsed.Add(PyramideBosnieButton.gameObject); });
 
-        ParanFantomeButton.onClick.AddListener(() => { OnPageOpen("Paranormal", "Fantome"); });
-        ParaMaisonButton.onClick.AddListener(() => { OnPageOpen("Paranormal", "Maison"); });
+        ParanFantomeButton.onClick.AddListener(() => { OnPageOpen("Paranormal", "Fantome"); alreadyUsed.Add(ParanFantomeButton.gameObject); });
+        ParaMaisonButton.onClick.AddListener(() => { OnPageOpen("Paranormal", "Maison"); alreadyUsed.Add(ParaMaisonButton.gameObject); });
+
+        AnthroTributs.onClick.AddListener(() => { OnPageOpen("Anthropologie", "Tributs"); alreadyUsed.Add(AnthroTributs.gameObject); });
+
+        AnthroMalediction.onClick.AddListener(() => { OnPageOpen("Anthropologie", "Malediction"); alreadyUsed.Add(AnthroMalediction.gameObject); });
+        AnthroOs.onClick.AddListener(() => { OnPageOpen("Anthropologie", "Os"); alreadyUsed.Add(AnthroOs.gameObject);  });
+
 
         instance = FindFirstObjectByType<MainManager>();
         passwordManager = GameObject.FindGameObjectWithTag("passwordManager");
 
         DisplayOneButtonByCategory();
+
+        alreadyUsed = new List<GameObject>();
 
     }
 
@@ -89,6 +103,10 @@ public class PageScript : MonoBehaviour
 
         ParanFantomeButton.gameObject.SetActive(false);
         ParaMaisonButton.gameObject.SetActive(false);
+
+        AnthroMalediction.gameObject.SetActive(false);
+        AnthroOs.gameObject.SetActive(false);
+        AnthroTributs.gameObject.SetActive(false);
     }
 
     private void ChangeDisplayedButtonsByInterest()
@@ -100,51 +118,37 @@ public class PageScript : MonoBehaviour
         {
             
             var rd = Random.Range(0f, 1f);
+            PageTags cat = (PageTags)(-1);
 
-            //Debug.Log("Button " + i + " rd " + rd);
-
-
-            float acc = 0;
-            PageTags cat = (PageTags)(-1) ;
-
-            for (int j = 0; j < sortedDict.Count(); j++)
+            if (rd > 0.3f)
             {
-               // Debug.Log("Jiyi " + j);
-                var inte = sortedDict.ElementAt(j).Value.interest;
-
-                acc += (inte - sortedDict.ElementAt(0).Value.interest) / sortedDict.ElementAt(sortedDict.Count() - 1).Value.interest;
-
-               // Debug.Log("acc : " + acc);
-                if (acc > rd)
-                {
-                    cat = sortedDict.ElementAt(j).Key;
-                   // Debug.Log("break");
-
-                    break;
-                }
+                cat = sortedDict.ElementAt(0).Key;
             }
 
-            // Debug.Log("conffrfrterdddd");
-            
+            else
+            {
+                var rd2 = new System.Random();
+                cat = sortedDict.ElementAt(rd2.Next(0, instance.model.Count)).Key;
+            }
+           
             var cont = pageButtons.transform.Find(TagToString(cat));
-
-           // Debug.Log("cont : cat" +cont + " : " + cat);
-
             var randChilds = Enumerable.Range(0, cont.childCount - 1).ToList();
             Shuffle(randChilds);
 
-          //  Debug.Log("Order : " + randChilds.ToString());
             foreach (var child in randChilds)
             {
-                if(!cont.GetChild(child).gameObject.activeInHierarchy)
+                if(!cont.GetChild(child).gameObject.activeInHierarchy && !alreadyUsed.Contains(cont.GetChild(child).gameObject))
                 {
                     cont.GetChild(child).gameObject.SetActive(true);
-                  //  Debug.Log("Selected : " + child);
+                    alreadyUsed.Add(cont.GetChild(child).gameObject);
                     break;
                 }
                     
             }
-        }   
+
+            alreadyUsed.Clear();
+
+        }
     }
     private void Shuffle(IList<int> ts)
     {
@@ -171,9 +175,11 @@ public class PageScript : MonoBehaviour
             StartCoroutine(DisplayPartial(m_page));     
         }
 
+        Debug.Log("li : " +  m_page.GetComponent<TagsList>()); ;
         UpdateInterest(m_page.GetComponent<TagsList>());
        
         ChangeDisplayedButtonsByInterest();
+
     }
 
     private IEnumerator DisplayPartial(GameObject page)
@@ -193,6 +199,7 @@ public class PageScript : MonoBehaviour
     {
         foreach (var tag in tagsList.tags)
         {
+            Debug.Log("mod " + instance.model + "tag " + tag + "mt " + instance.model[tag]);
             var data = instance.model[tag];
             var updated = new PlayerData(data.interest + 0.3f, data.stress);
             instance.model[tag] = updated;
