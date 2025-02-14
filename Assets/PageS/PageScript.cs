@@ -105,7 +105,7 @@ public class PageScript : MonoBehaviour
 
 
             float acc = 0;
-            string cat = string.Empty;
+            PageTags cat = (PageTags)(-1) ;
 
             for (int j = 0; j < sortedDict.Count(); j++)
             {
@@ -124,9 +124,9 @@ public class PageScript : MonoBehaviour
                 }
             }
 
-           // Debug.Log("conffrfrterdddd");
-
-            var cont = pageButtons.transform.Find(cat);
+            // Debug.Log("conffrfrterdddd");
+            
+            var cont = pageButtons.transform.Find(TagToString(cat));
 
            // Debug.Log("cont : cat" +cont + " : " + cat);
 
@@ -193,11 +193,14 @@ public class PageScript : MonoBehaviour
     {
         foreach (var tag in tagsList.tags)
         {
-            var data = instance.model[tag.ToString()];
+            var data = instance.model[tag];
             var updated = new PlayerData(data.interest + 0.3f, data.stress);
-            instance.model[tag.ToString()] = updated;
+            instance.model[tag] = updated;
         }
     }
 
-
+    private string TagToString(PageTags tag)
+    {
+        return Enum.GetName(typeof(PageTags), tag);
+    }
 }

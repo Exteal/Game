@@ -7,7 +7,7 @@ public class MainManager : MonoBehaviour
 {
     public static MainManager Instance;
 
-    public Dictionary<string, PlayerData> model;
+    public Dictionary<PageTags, PlayerData> model;
     
     private void Awake()
     {
@@ -20,11 +20,11 @@ public class MainManager : MonoBehaviour
         Instance = this;
         DontDestroyOnLoad(gameObject);
 
-        model = new Dictionary<string, PlayerData>();
+        model = new Dictionary<PageTags, PlayerData>();
 
-        foreach (var tag in Enum.GetNames(typeof(PageTags)))
+        foreach (var tag in Enum.GetValues(typeof(PageTags)))
         {
-            model.Add(tag, new PlayerData(0.2f, 0));
+            model.Add((PageTags)tag, new PlayerData(0.2f, 0));
         }
     }
 }
